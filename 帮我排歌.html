@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>帮我排歌</title>
+    <style>
+        /* ===== 全局 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-page: #F2F5F9;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAFC;
+            --border-light: #E6ECF2;
+            --text-primary: #121826;
+            --text-secondary: #4A5A6A;
+            --text-muted: #8A9BAE;
+            --brand-green: #1DB954;
+            --brand-green-dark: #17A74B;
+            --brand-green-light: #E6F5EC;
+            --brand-gradient: linear-gradient(135deg, #1DB954 0%, #0D8C3C 100%);
+            --accent-gold: #F5A623;
+            --accent-rose: #F27A7A;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.07);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-page);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .phone {
+            width: 100%;
+            max-width: 400px;
+            min-height: 780px;
+            background: var(--bg-card);
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ===== 背景氛围光晕 ===== */
+        .phone::before {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .phone::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ============================================================
+           顶部区域
+           ============================================================ */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px 6px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .status-bar .brand {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-bar .brand .green {
+            color: var(--brand-green);
+        }
+        .status-bar .brand .logo-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--brand-gradient);
+            border-radius: 6px;
+            margin-right: 2px;
+            position: relative;
+        }
+        .status-bar .brand .logo-icon::after {
+            content: '♪';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .status-bar .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 450;
+        }
+        .status-bar .status .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--brand-green);
+            display: inline-block;
+            animation: pulse-dot 2.2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.35;
+                transform: scale(0.8);
+            }
+        }
+
+        .function-head {
+            padding: 4px 24px 12px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .function-head .badge {
+            display: inline-block;
+            background: var(--brand-green-light);
+            color: var(--brand-green);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 14px;
+            border-radius: 30px;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .function-head h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.8px;
+            line-height: 1.1;
+        }
+        .function-head h1 .light {
+            font-weight: 400;
+            color: var(--text-secondary);
+            font-size: 22px;
+            letter-spacing: -0.3px;
+        }
+        .function-head .desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            font-weight: 400;
+        }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 24px 16px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
+            z-index: 1;
+        }
+        .user-bar .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-bar .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--brand-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(29, 185, 84, 0.15);
+        }
+        .user-bar .avatar svg {
+            width: 32px;
+            height: 32px;
+            fill: none;
+        }
+        .user-bar .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .user-bar .name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+        .user-bar .stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 430;
+        }
+        .user-bar .stats .num {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .user-bar .stats .sep {
+            color: var(--border-light);
+            font-weight: 300;
+        }
+
+        /* ===== 页面切换 ===== */
+        .page {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            padding: 0 24px 24px;
+            animation: fadeUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            z-index: 1;
+        }
+        .page.active {
+            display: flex;
+        }
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+                   入口页
+                   ============================================================ */
+        .entry {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 6px 0 4px;
+        }
+
+        .entry-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .entry-visual .hero-icon {
+            font-size: 72px;
+            filter: drop-shadow(0 8px 32px rgba(29, 185, 84, 0.08));
+            animation: float-icon 4s ease-in-out infinite;
+        }
+        @keyframes float-icon {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        .entry-visual .glow-ring {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.04) 0%, transparent 70%);
+            animation: pulse-ring 3s ease-in-out infinite;
+        }
+        @keyframes pulse-ring {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 0.2;
+            }
+        }
+
+        .entry .tagline {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .entry .tagline .hl {
+            color: var(--brand-green);
+        }
+        .entry .sub-tagline {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .prompts {
+            margin-bottom: 16px;
+            background: var(--brand-green-light);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            border: 1px solid rgba(29, 185, 84, 0.06);
+        }
+        .prompts .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .prompts .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .prompts .chip {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            border-radius: 30px;
+            padding: 6px 16px 6px 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: var(--shadow-sm);
+            font-weight: 450;
+        }
+        .prompts .chip:hover {
+            border-color: var(--brand-green);
+            color: var(--brand-green);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .prompts .chip:active {
+            transform: scale(0.96);
+        }
+
+        .examples {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .examples .ex {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        .examples .ex::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--brand-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .examples .ex:hover::before {
+            opacity: 1;
+        }
+        .examples .ex:hover {
+            border-color: var(--brand-green);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .examples .ex:active {
+            transform: scale(0.98);
+        }
+        .examples .ex .icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--brand-green-light);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        .examples .ex:hover .icon {
+            background: var(--brand-green);
+            color: #fff;
+        }
+        .examples .ex .text {
+            font-size: 13.5px;
+            color: var(--text-primary);
+            line-height: 1.4;
+            font-weight: 430;
+            flex: 1;
+        }
+        .examples .ex .text .hl {
+            color: var(--brand-green);
+            font-weight: 500;
+        }
+        .examples .ex .arrow {
+            color: var(--text-muted);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        .examples .ex:hover .arrow {
+            color: var(--brand-green);
+            transform: translateX(4px);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 60px;
+            padding: 2px 2px 2px 22px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+        .input-row:focus-within {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 6px rgba(29, 185, 84, 0.06);
+        }
+        .input-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            padding: 13px 0;
+            color: var(--text-primary);
+            font-weight: 430;
+            min-width: 0;
+        }
+        .input-row input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 14px;
+        }
+        .input-row .btn {
+            background: var(--brand-gradient);
+            border: none;
+            border-radius: 60px;
+            padding: 10px 26px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 12px rgba(29, 185, 84, 0.15);
+        }
+        .input-row .btn:hover {
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.2);
+            transform: translateY(-1px);
+        }
+        .input-row .btn:active {
+            transform: scale(0.94);
+            box-shadow: 0 2px 8px rgba(29, 185, 84, 0.1);
+        }
+
+        .entry-foot {
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            letter-spacing: 0.3px;
+            font-weight: 400;
+        }
+
+        /* ============================================================
+                   结果页
+                   ============================================================ */
+        .result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0 14px;
+            flex-shrink: 0;
+        }
+        .result-head .back {
+            font-size: 22px;
+            color: var(--text-secondary);
+            cursor: default;
+            width: 32px;
+            line-height: 1;
+        }
+        .result-head .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .result-head .title .badge {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--brand-green);
+            background: var(--brand-green-light);
+            padding: 1px 12px;
+            border-radius: 30px;
+        }
+        .result-head .status {
+            font-size: 12px;
+            color: var(--brand-green);
+            font-weight: 500;
+        }
+
+        .notes {
+            background: var(--brand-green-light);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+            border: 1px solid rgba(29, 185, 84, 0.06);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        .notes .head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .notes .head .l {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--brand-green);
+        }
+        .notes .head .l .icon {
+            font-size: 16px;
+        }
+        .notes .head .conf {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 450;
+            background: var(--bg-card);
+            padding: 2px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--border-light);
+        }
+        .notes .step {
+            display: flex;
+            gap: 10px;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            animation: stepIn 0.4s ease forwards;
+            opacity: 0;
+            transform: translateX(-6px);
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .notes .step:last-child {
+            border-bottom: none;
+        }
+        .notes .step:nth-child(1) {
+            animation-delay: 0.04s;
+        }
+        .notes .step:nth-child(2) {
+            animation-delay: 0.10s;
+        }
+        .notes .step:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+        .notes .step:nth-child(4) {
+            animation-delay: 0.22s;
+        }
+        .notes .step:nth-child(5) {
+            animation-delay: 0.28s;
+        }
+        .notes .step:nth-child(6) {
+            animation-delay: 0.34s;
+        }
+        @keyframes stepIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-6px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .notes .step .mark {
+            color: var(--brand-green);
+            font-size: 14px;
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center;
+        }
+        .notes .step .mark.warn {
+            color: var(--accent-gold);
+        }
+        .notes .step strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .notes .step .hl {
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+        .notes .step .conf-tag {
+            display: inline-block;
+            font-size: 10px;
+            background: var(--bg-card);
+            padding: 0 10px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
+            margin-left: 4px;
+            font-weight: 400;
+        }
+        .notes .step .conf-tag.high {
+            color: var(--brand-green);
+            border-color: rgba(29, 185, 84, 0.12);
+        }
+        .notes .step .conf-tag.med {
+            color: var(--accent-gold);
+            border-color: rgba(245, 166, 35, 0.12);
+        }
+        .notes .step .conf-tag.low {
+            color: #E8836B;
+            border-color: rgba(232, 131, 107, 0.12);
+        }
+
+        .playlist {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 2px;
+        }
+        .playlist::-webkit-scrollbar {
+            width: 2px;
+        }
+        .playlist::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 10px;
+        }
+
+        .pl-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .pl-head .name {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pl-head .name .cnt {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg-page);
+            padding: 0 12px;
+            border-radius: 30px;
+        }
+        .pl-head .save {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-page);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 5px 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 450;
+        }
+        .pl-head .save:hover {
+            border-color: var(--brand-green);
+            color: var(--brand-green);
+            background: var(--brand-green-light);
+        }
+        .pl-head .save:active {
+            transform: scale(0.94);
+        }
+
+        .phase {
+            margin-bottom: 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            padding: 14px 18px;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .phase:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .phase .ph-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .phase .ph-head .label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--brand-green);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .phase .ph-head .label .dot-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--brand-green);
+        }
+        .phase .ph-head .bpm {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 450;
+        }
+        .phase .ph-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 2px solid var(--brand-green);
+            line-height: 1.4;
+        }
+
+        .track {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 4px;
+            border-radius: var(--radius-xs);
+            transition: background 0.15s;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .track:last-child {
+            border-bottom: none;
+        }
+        .track:hover {
+            background: var(--bg-card-hover);
+        }
+        .track .idx {
+            width: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 450;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .track .art {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #E6F5EC, #C8E6D9);
+            background-size: cover;
+            background-position: center;
+            transition: var(--transition);
+        }
+        .track:hover .art {
+            transform: scale(1.02);
+        }
+        .track .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .track .info .name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .track .info .artist {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .track .info .reason {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .track .info .reason .tag {
+            background: var(--brand-green-light);
+            padding: 0 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            color: var(--brand-green);
+            font-weight: 500;
+        }
+        .track .bpm {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-page);
+            padding: 1px 10px;
+            border-radius: 30px;
+            flex-shrink: 0;
+            font-weight: 450;
+        }
+
+        .tweak {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .tweak .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 450;
+            margin-right: 2px;
+        }
+        .tweak .btn {
+            background: var(--bg-page);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 3px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 450;
+        }
+        .tweak .btn:hover {
+            border-color: var(--brand-green);
+            color: var(--brand-green);
+            background: var(--brand-green-light);
+        }
+        .tweak .btn:active {
+            transform: scale(0.94);
+        }
+        .tweak .inp {
+            flex: 1;
+            min-width: 90px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 3px 14px;
+            font-size: 12px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+            font-weight: 430;
+        }
+        .tweak .inp:focus {
+            border-color: var(--brand-green);
+        }
+        .tweak .inp::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .compare {
+            margin-top: 8px;
+            padding: 8px 14px;
+            background: var(--brand-green-light);
+            border-radius: var(--radius-xs);
+            border: 1px solid rgba(29, 185, 84, 0.06);
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .compare.show {
+            display: block;
+        }
+        .compare .old {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+        .compare .new {
+            color: var(--brand-green);
+            font-weight: 500;
+        }
+        .compare .arrow {
+            color: var(--accent-gold);
+            margin: 0 6px;
+        }
+        .compare .actions {
+            margin-top: 6px;
+            display: flex;
+            gap: 8px;
+        }
+        .compare .actions button {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 3px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 450;
+        }
+        .compare .actions button:hover {
+            background: var(--bg-card-hover);
+        }
+        .compare .actions button.confirm {
+            border-color: var(--brand-green);
+            color: var(--brand-green);
+            background: var(--brand-green-light);
+        }
+
+        .metrics {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-shrink: 0;
+        }
+        .metrics .m {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 6px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .metrics .m .num {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--brand-green);
+        }
+        .metrics .m .num .pct {
+            font-size: 12px;
+        }
+        .metrics .m .lbl {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 450;
+            letter-spacing: 0.2px;
+        }
+
+        .share {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-top: 14px;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+        .share .title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+        .share .btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .share .btns button {
+            background: var(--bg-page);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 5px 18px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 450;
+        }
+        .share .btns button:hover {
+            border-color: var(--brand-green);
+            color: var(--brand-green);
+            background: var(--brand-green-light);
+        }
+        .share .btns button:active {
+            transform: scale(0.94);
+        }
+
+        .feedback {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0 2px;
+            border-top: 1px solid var(--border-light);
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+        .feedback .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 450;
+        }
+        .feedback .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .feedback .actions button {
+            background: var(--bg-page);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 5px 18px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 450;
+        }
+        .feedback .actions button:hover {
+            border-color: var(--brand-green);
+        }
+        .feedback .actions button:active {
+            transform: scale(0.94);
+        }
+        .feedback .actions button.like {
+            color: var(--brand-green);
+            border-color: rgba(29, 185, 84, 0.12);
+            background: var(--brand-green-light);
+        }
+        .feedback .actions button.like:hover {
+            background: var(--brand-green);
+            color: #fff;
+        }
+
+        .ld {
+            display: flex;
+            gap: 5px;
+            padding: 6px 0;
+        }
+        .ld span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--brand-green);
+            animation: bounce 1.2s ease-in-out infinite;
+        }
+        .ld span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        .ld span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        @keyframes bounce {
+            0%,
+            80%,
+            100% {
+                transform: scale(0.4);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 380px) {
+            .phone {
+                border-radius: 24px;
+                min-height: 640px;
+            }
+            .function-head h1 {
+                font-size: 24px;
+            }
+            .function-head h1 .light {
+                font-size: 18px;
+            }
+            .user-bar .name {
+                font-size: 14px;
+            }
+            .user-bar .stats {
+                font-size: 12px;
+                gap: 6px;
+            }
+            .user-bar .avatar {
+                width: 36px;
+                height: 36px;
+            }
+            .user-bar .avatar svg {
+                width: 26px;
+                height: 26px;
+            }
+            .entry .tagline {
+                font-size: 18px;
+            }
+            .entry-visual .hero-icon {
+                font-size: 56px;
+            }
+            .input-row input {
+                font-size: 13px;
+                padding: 10px 0;
+            }
+            .input-row .btn {
+                font-size: 13px;
+                padding: 8px 18px;
+            }
+            .examples .ex .text {
+                font-size: 12.5px;
+            }
+            .track .info .name {
+                font-size: 13px;
+            }
+            .notes .step {
+                font-size: 12px;
+            }
+            .status-bar .brand {
+                font-size: 14px;
+            }
+            .prompts .chip {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+        }
+
+        @media (min-width: 500px) {
+            .phone {
+                max-width: 420px;
+                min-height: 780px;
+                border-radius: 44px;
+            }
+            .function-head h1 {
+                font-size: 30px;
+            }
+            .examples .ex .text {
+                font-size: 14px;
+            }
+            .track .info .name {
+                font-size: 15px;
+            }
+            .notes .step {
+                font-size: 14px;
+            }
+            .user-bar .avatar {
+                width: 48px;
+                height: 48px;
+            }
+            .user-bar .avatar svg {
+                width: 34px;
+                height: 34px;
+            }
+            .entry-visual .hero-icon {
+                font-size: 84px;
+            }
+        }
+
+        /* ============================================================
+           桌面端响应式 (>= 900px)
+           ============================================================ */
+        @media (min-width: 900px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+                background: var(--bg-page);
+            }
+
+            /* 去掉手机外壳，变成全宽 Web App */
+            .phone {
+                max-width: 1120px;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                margin: 0 auto;
+            }
+            .phone::before,
+            .phone::after {
+                display: none;
+            }
+
+            /* 顶部区域 */
+            .status-bar {
+                padding: 22px 48px 8px;
+                max-width: 1120px;
+            }
+            .function-head {
+                padding: 4px 48px 16px;
+            }
+            .function-head h1 {
+                font-size: 34px;
+            }
+            .function-head h1 .light {
+                font-size: 26px;
+            }
+            .user-bar {
+                padding: 0 48px 16px;
+            }
+
+            .page {
+                padding: 0 48px 40px;
+            }
+
+            /* ---- 入口页：左右双栏 ---- */
+            #pageEntry .entry {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px 56px;
+                align-items: center;
+                max-width: 920px;
+                margin: 0 auto;
+                padding: 24px 0;
+            }
+            .entry-visual {
+                grid-column: 1;
+                grid-row: 1;
+                justify-content: flex-start;
+                margin-bottom: 0;
+            }
+            .entry-visual .hero-icon {
+                font-size: 64px;
+            }
+            .entry .tagline {
+                grid-column: 1;
+                grid-row: 2;
+                text-align: left;
+                font-size: 28px;
+            }
+            .entry .sub-tagline {
+                grid-column: 1;
+                grid-row: 3;
+                text-align: left;
+                margin-bottom: 0;
+            }
+            .prompts {
+                grid-column: 2;
+                grid-row: 1 / 3;
+                margin-bottom: 0;
+            }
+            .examples {
+                grid-column: 2;
+                grid-row: 3 / 6;
+                margin-bottom: 0;
+            }
+            .input-row {
+                grid-column: 1;
+                grid-row: 4;
+            }
+            .entry-foot {
+                grid-column: 1;
+                grid-row: 5;
+                text-align: left;
+            }
+
+            /* ---- 结果页：左侧手记 + 右侧歌单 ---- */
+            #pageResult.active {
+                display: grid;
+                grid-template-columns: 360px 1fr;
+                gap: 24px;
+                align-items: start;
+                max-width: 1040px;
+                margin: 0 auto;
+            }
+            #pageResult > .result-head {
+                grid-column: 1 / -1;
+                grid-row: 1;
+            }
+            #pageResult > .notes {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            #pageResult > .playlist {
+                grid-column: 2;
+                grid-row: 2 / span 4;
+                max-height: calc(100vh - 240px);
+                overflow-y: auto;
+            }
+            #pageResult > .metrics {
+                grid-column: 1;
+                grid-row: 3;
+            }
+            #pageResult > .share {
+                grid-column: 1;
+                grid-row: 4;
+            }
+            #pageResult > .feedback {
+                grid-column: 1;
+                grid-row: 5;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone" id="app">
+
+        <!-- ==========================================================
+        顶部区域（去AI味）
+        ========================================================== -->
+        <div class="status-bar">
+            <span class="brand">
+                <span class="logo-icon"></span>
+                <span class="green">QQ</span>音乐
+            </span>
+            <span class="status"><span class="dot"></span>在线</span>
+        </div>
+
+        <div class="function-head">
+            <div class="badge">✦ 智能编排</div>
+            <h1>帮我排歌 <span class="light">· 专属歌单</span></h1>
+            <div class="desc">用你的话，生成一张有结构的专属歌单</div>
+        </div>
+
+        <div class="user-bar">
+            <div class="left">
+                <div class="avatar">
+                    <img src="avatar.png" alt="季月" />
+                </div>
+                <span class="name">季月</span>
+            </div>
+            <div class="stats">
+                <span>收藏 <span class="num" id="assetCollect">347</span>首</span>
+                <span class="sep">·</span>
+                <span>歌单 <span class="num" id="assetPlaylist">12</span>个</span>
+            </div>
+        </div>
+
+        <!-- ==========================================================
+        页面: 入口
+        ========================================================== -->
+        <div class="page active" id="pageEntry">
+            <div class="entry">
+                <div class="entry-visual">
+                    <div class="glow-ring"></div>
+                    <span class="hero-icon">🎧</span>
+                </div>
+                <div class="tagline">一句话，<span class="hl">智能</span>帮你排好歌</div>
+                <div class="sub-tagline">不只是推荐，而是有结构的音乐编排</div>
+
+                <div class="prompts">
+                    <div class="label">💡 试试这样问</div>
+                    <div class="chips">
+                        <span class="chip" data-task="夜跑">🏃 夜跑·节奏递进</span>
+                        <span class="chip" data-task="通勤">🚇 通勤·整理</span>
+                        <span class="chip" data-task="聚会">🎉 聚餐·不冷场</span>
+                        <span class="chip" data-task="自定义">📝 自定义</span>
+                    </div>
+                </div>
+
+                <div class="examples">
+                    <div class="ex" data-task="夜跑">
+                        <span class="icon">🏃</span>
+                        <div class="text">“从我最近收藏里排一个40分钟夜跑歌单，<span class="hl">前10分钟热身，后面节奏拉高，最后舒缓一点</span>”</div>
+                        <span class="arrow">›</span>
+                    </div>
+                    <div class="ex" data-task="通勤">
+                        <span class="icon">🚇</span>
+                        <div class="text">“把这张歌单整理成通勤版，<span class="hl">去掉太吵的歌</span>”</div>
+                        <span class="arrow">›</span>
+                    </div>
+                    <div class="ex" data-task="聚会">
+                        <span class="icon">🎉</span>
+                        <div class="text">“今晚聚餐3小时，自动排一套<span class="hl">不冷场</span>的BGM”</div>
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <input type="text" id="taskInput" placeholder="描述你的音乐任务..." />
+                    <button class="btn" id="sendBtn">生成</button>
+                </div>
+                <div class="entry-foot">自然语言 · 自动推理 · 可微调 · 一键收藏</div>
+            </div>
+        </div>
+
+        <!-- ==========================================================
+        页面: 结果
+        ========================================================== -->
+        <div class="page" id="pageResult">
+            <div class="result-head">
+                <span class="back" id="backBtn">‹</span>
+                <span class="title">🎬 编排中 <span class="badge">智能</span></span>
+                <span class="status" id="resultStatus">完成</span>
+            </div>
+
+            <div class="notes" id="directorNotes">
+                <div class="head">
+                    <span class="l"><span class="icon">📝</span> 导演手记</span>
+                    <span class="conf" id="confBadge">置信度 87%</span>
+                </div>
+                <div id="notesContainer">
+                    <div class="ld" id="loadingDots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="playlist" id="playlistContainer">
+                <div class="pl-head">
+                    <span class="name" id="playlistName">
+                        🎵 智能编排
+                        <span class="cnt" id="trackCount">0 首</span>
+                    </span>
+                    <button class="save" id="saveBtn">♡ 收藏</button>
+                </div>
+                <div id="trackList"></div>
+            </div>
+
+            <div class="metrics" id="valueMetrics">
+                <div class="m">
+                    <div class="num"><span id="vmCollectRate">70</span><span class="pct">%</span></div>
+                    <div class="lbl">📦 收藏调度</div>
+                </div>
+                <div class="m">
+                    <div class="num"><span id="vmPlaylistRate">89</span><span class="pct">%</span></div>
+                    <div class="lbl">⏱️ 预计播完</div>
+                </div>
+                <div class="m">
+                    <div class="num"><span id="vmSaveCount">1</span></div>
+                    <div class="lbl">💾 已保存</div>
+                </div>
+            </div>
+
+            <div class="share">
+                <div class="title">📤 分享这张歌单</div>
+                <div class="btns">
+                    <button id="sharePoster">🖼️ 海报</button>
+                    <button id="shareLink">🔗 链接</button>
+                    <button id="shareMoment">📱 朋友圈</button>
+                </div>
+            </div>
+
+            <div class="feedback">
+                <span class="label">这个编排怎么样？</span>
+                <div class="actions">
+                    <button id="feedbackBad">👎 调整</button>
+                    <button id="feedbackGood" class="like">👍 太棒了</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ===== DOM =====
+            const pageEntry = document.getElementById('pageEntry');
+            const pageResult = document.getElementById('pageResult');
+            const taskInput = document.getElementById('taskInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const backBtn = document.getElementById('backBtn');
+            const notesContainer = document.getElementById('notesContainer');
+            const loadingDots = document.getElementById('loadingDots');
+            const trackList = document.getElementById('trackList');
+            const playlistName = document.getElementById('playlistName');
+            const trackCount = document.getElementById('trackCount');
+            const resultStatus = document.getElementById('resultStatus');
+            const confBadge = document.getElementById('confBadge');
+            const saveBtn = document.getElementById('saveBtn');
+            const feedbackGood = document.getElementById('feedbackGood');
+            const feedbackBad = document.getElementById('feedbackBad');
+            const sharePoster = document.getElementById('sharePoster');
+            const shareLink = document.getElementById('shareLink');
+            const shareMoment = document.getElementById('shareMoment');
+            const vmCollectRate = document.getElementById('vmCollectRate');
+            const vmPlaylistRate = document.getElementById('vmPlaylistRate');
+            const vmSaveCount = document.getElementById('vmSaveCount');
+
+            // ===== 数据 =====
+            const exampleData = {
+                '夜跑': {
+                    input: '从我最近收藏里排一个40分钟夜跑歌单，前10分钟热身，后面节奏拉高，最后舒缓一点。',
+                    notes: [
+                        '已拆解：<strong>热身 10min</strong> → <strong>节奏拉高 20min</strong> → <strong>舒缓收尾 10min</strong>',
+                        '已调度：收藏 70% + 平台曲库 20% + 历史歌单 10%',
+                        '筛选：BPM 100-135，能量值 0.4-0.8，剔除刺耳高频',
+                        '⚠️ 发现：收藏中缺少「热身段」低BPM歌曲 → 已从「每日推荐」补充 <span class="hl">3首</span>',
+                        '📊 置信度：热身段 <span class="conf-tag med">72%</span> ｜ 推进段 <span class="conf-tag high">88%</span> ｜ 收尾段 <span class="conf-tag low">65%</span>',
+                        '🎵 生成歌单：<span class="hl">「夜跑·渐进式40min」</span>'
+                    ],
+                    phases: [{
+                        name: '热身入场',
+                        bpm: '102 BPM',
+                        desc: '低强度唤醒，逐步进入状态',
+                        tracks: [
+                            { name: 'Runaway', artist: 'Kanye West', bpm: 102,
+                            reason: '匹配「热身」· 低人声密度 · 来自收藏' },
+                            { name: 'Lose Yourself', artist: 'Eminem', bpm: 108,
+                            reason: '过渡推进 · 能量逐步上升 · 历史歌单' },
+                            { name: 'Till I Collapse', artist: 'Eminem', bpm: 112,
+                            reason: '稳定节奏 · 收藏高频播放' },
+                        ]
+                    }, {
+                        name: '稳定推进',
+                        bpm: '118 BPM',
+                        desc: '渐进式步频陪伴，保持匀速',
+                        tracks: [
+                            { name: 'Believer', artist: 'Imagine Dragons', bpm: 125,
+                            reason: '核心燃点 · 平台热门 · 能量值0.75' },
+                            { name: 'Thunder', artist: 'Imagine Dragons', bpm: 122,
+                            reason: '节奏递进 · 收藏+平台混合' },
+                            { name: 'Natural', artist: 'Imagine Dragons', bpm: 128,
+                            reason: '持续输出 · 高能量不刺耳' },
+                            { name: 'Whatever It Takes', artist: 'Imagine Dragons', bpm: 131,
+                            reason: '强度提升 · 冲刺感' },
+                        ]
+                    }, {
+                        name: '强度峰值',
+                        bpm: '132 BPM',
+                        desc: '最高能量段，释放潜能',
+                        tracks: [
+                            { name: 'Radioactive', artist: 'Imagine Dragons', bpm: 136,
+                            reason: '巅峰爆发 · 平台认证运动曲' },
+                            { name: 'Centuries', artist: 'Fall Out Boy', bpm: 134,
+                            reason: '高燃 · 收藏+平台双标签' },
+                        ]
+                    }, {
+                        name: '舒缓收尾',
+                        bpm: '98 BPM',
+                        desc: '自然放松，恢复平静',
+                        tracks: [
+                            { name: 'Demons', artist: 'Imagine Dragons', bpm: 98,
+                            reason: '平滑过渡 · 低能量 · 来自收藏' },
+                            { name: 'It\'s My Life', artist: 'Bon Jovi', bpm: 96,
+                            reason: '经典收尾 · 情绪回落' },
+                        ]
+                    }],
+                    metrics: { collectRate: 70, playlistRate: 89 }
+                },
+                '通勤': {
+                    input: '把这张歌单整理成通勤版，去掉太吵的歌',
+                    notes: [
+                        '已解析当前歌单「我的每日推荐」 (共 32 首)',
+                        '过滤：「去掉太吵的」→ 剔除能量值 > 0.8 的歌曲 (剔除 11 首)',
+                        '筛选：「通勤版」→ 保留 BPM 90-130，能量值 0.4-0.7',
+                        '📊 置信度：早高峰 <span class="conf-tag high">85%</span> ｜ 平缓段 <span class="conf-tag high">90%</span> ｜ 晚高峰 <span class="conf-tag med">78%</span>',
+                        '🎵 生成歌单：<span class="hl">「通勤律动·早晚双程」</span>'
+                    ],
+                    phases: [{
+                        name: '早高峰活力',
+                        bpm: '115 BPM',
+                        desc: '唤醒精神，轻快开始',
+                        tracks: [
+                            { name: 'Blinding Lights', artist: 'The Weeknd', bpm: 118,
+                            reason: '活力启动 · 平台热门' },
+                            { name: 'Uptown Funk', artist: 'Mark Ronson', bpm: 115,
+                            reason: '节奏明快 · 收藏' },
+                        ]
+                    }, {
+                        name: '平缓过渡',
+                        bpm: '100 BPM',
+                        desc: '通勤中段，放松心情',
+                        tracks: [
+                            { name: 'Shape of You', artist: 'Ed Sheeran', bpm: 96,
+                            reason: '舒适旋律 · 收藏高频' },
+                            { name: 'Levitating', artist: 'Dua Lipa', bpm: 103,
+                            reason: '轻快 · 平台推荐' },
+                        ]
+                    }, {
+                        name: '晚高峰归程',
+                        bpm: '122 BPM',
+                        desc: '舒缓疲劳，轻快收尾',
+                        tracks: [
+                            { name: 'Don\'t Start Now', artist: 'Dua Lipa', bpm: 124,
+                            reason: '下班节奏 · 能量适中' },
+                            { name: 'Physical', artist: 'Dua Lipa', bpm: 130,
+                            reason: '提振精神 · 收藏' },
+                        ]
+                    }],
+                    metrics: { collectRate: 55, playlistRate: 82 }
+                },
+                '聚会': {
+                    input: '今晚聚餐3小时，自动排一套不冷场的BGM',
+                    notes: [
+                        '已读取环境：聚餐 → 社交场景，目标「不冷场」',
+                        '时长：3小时 ≈ 180分钟 → 编排约 45-50 首',
+                        '曲风策略：Pop / Funk / Disco，能量值 0.5-0.8',
+                        '📊 置信度：暖场段 <span class="conf-tag high">92%</span> ｜ 高潮段 <span class="conf-tag high">88%</span> ｜ 收尾段 <span class="conf-tag med">76%</span>',
+                        '🎵 生成歌单：<span class="hl">「微醺夜·三小时不冷场」</span>'
+                    ],
+                    phases: [{
+                        name: '暖场轻快',
+                        bpm: '110 BPM',
+                        desc: '宾客入场，轻松氛围',
+                        tracks: [
+                            { name: 'Uptown Funk', artist: 'Mark Ronson', bpm: 115,
+                            reason: '经典开场 · 收藏' },
+                            { name: 'Get Lucky', artist: 'Daft Punk', bpm: 116,
+                            reason: '律动感 · 平台热门' },
+                        ]
+                    }, {
+                        name: '高潮律动',
+                        bpm: '125 BPM',
+                        desc: '酒过三巡，气氛升温',
+                        tracks: [
+                            { name: 'Blinding Lights', artist: 'The Weeknd', bpm: 118,
+                            reason: '气氛核心 · 收藏' },
+                            { name: 'Levitating', artist: 'Dua Lipa', bpm: 103,
+                            reason: '轻快跳跃 · 平台' },
+                            { name: 'Don\'t Start Now', artist: 'Dua Lipa', bpm: 124,
+                            reason: '节奏强劲 · 收藏' },
+                        ]
+                    }, {
+                        name: '收尾柔和',
+                        bpm: '100 BPM',
+                        desc: '聚会尾声，惬意放松',
+                        tracks: [
+                            { name: 'September', artist: 'Earth Wind & Fire', bpm: 127,
+                            reason: '经典回忆 · 收藏' },
+                            { name: 'Boogie Wonderland', artist: 'Earth Wind & Fire', bpm: 126,
+                            reason: '欢快收尾 · 平台' },
+                        ]
+                    }],
+                    metrics: { collectRate: 45, playlistRate: 76 }
+                }
+            };
+
+            const defaultData = {
+                notes: [
+                    '已解析你的任务请求',
+                    '正在检索你的收藏与历史偏好...',
+                    '已完成意图理解与条件过滤',
+                    '📊 置信度：整体编排 <span class="conf-tag high">82%</span>',
+                    '🎵 生成歌单：<span class="hl">「为你定制 · 智能编排」</span>'
+                ],
+                phases: [{
+                    name: '精选推荐',
+                    bpm: '120 BPM',
+                    desc: '根据你的任务智能生成',
+                    tracks: [
+                        { name: 'Blinding Lights', artist: 'The Weeknd', bpm: 118,
+                        reason: '匹配你的任务 · 平台热门' },
+                        { name: 'Uptown Funk', artist: 'Mark Ronson', bpm: 115,
+                        reason: '节奏明快 · 收藏' },
+                        { name: 'Shape of You', artist: 'Ed Sheeran', bpm: 96,
+                        reason: '舒适旋律 · 历史歌单' },
+                        { name: 'Levitating', artist: 'Dua Lipa', bpm: 103,
+                        reason: '轻快 · 平台推荐' },
+                        { name: 'Don\'t Start Now', artist: 'Dua Lipa', bpm: 124,
+                        reason: '节奏强劲 · 收藏' },
+                    ]
+                }],
+                metrics: { collectRate: 60, playlistRate: 75 }
+            };
+
+            // ===== 渲染 =====
+            let currentPhases = [];
+            let currentPlaylistTitle = '';
+            let currentMetrics = { collectRate: 70, playlistRate: 89 };
+
+            function renderNotes(notes) {
+                notesContainer.innerHTML = '';
+                notes.forEach((text, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'step';
+                    div.style.animationDelay = (i * 0.06) + 's';
+                    let mark = '✓';
+                    let cls = '';
+                    if (text.includes('⚠️')) { mark = '⚠️';
+                        cls = 'warn'; }
+                    if (text.includes('📊')) { mark = '📊';
+                        cls = ''; }
+                    if (text.includes('🎵')) { mark = '🎵';
+                        cls = ''; }
+                    div.innerHTML = `
+                        <span class="mark ${cls}">${mark}</span>
+                        <span>${text}</span>
+                    `;
+                    notesContainer.appendChild(div);
+                });
+                const confMatch = notes.join(' ').match(/置信度[^\d]*(\d+)%/);
+                if (confMatch) {
+                    confBadge.textContent = '置信度 ' + confMatch[1] + '%';
+                }
+            }
+
+            function renderPlaylist(phases, playlistTitle) {
+                trackList.innerHTML = '';
+                const total = phases.reduce((acc, p) => acc + p.tracks.length, 0);
+                playlistName.innerHTML = `
+                    🎵 ${playlistTitle || '智能编排'}
+                    <span class="cnt">${total} 首</span>
+                `;
+                trackCount.textContent = total + ' 首';
+
+                let trackCounter = 0;
+                phases.forEach((phase, phaseIdx) => {
+                    const group = document.createElement('div');
+                    group.className = 'phase';
+                    group.dataset.phaseIdx = phaseIdx;
+
+                    const head = document.createElement('div');
+                    head.className = 'ph-head';
+                    head.innerHTML = `
+                        <span class="label"><span class="dot-indicator"></span> ${phase.name}</span>
+                        <span class="bpm">${phase.bpm}</span>
+                    `;
+                    group.appendChild(head);
+
+                    if (phase.desc) {
+                        const desc = document.createElement('div');
+                        desc.className = 'ph-desc';
+                        desc.textContent = phase.desc;
+                        group.appendChild(desc);
+                    }
+
+                    phase.tracks.forEach((track, idx) => {
+                        const item = document.createElement('div');
+                        item.className = 'track';
+                        const globalIdx = trackCounter + idx + 1;
+                        // 用歌名生成稳定的颜色，本地渲染不依赖网络
+                        const seed = (track.name + track.artist).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+                        const hue = seed % 360;
+                        const coverBg = track.cover
+                            ? `background-image:url('${track.cover}');background-size:cover;background-position:center`
+                            : `background:linear-gradient(135deg,hsl(${hue},65%,55%),hsl(${(hue + 40) % 360},70%,45%))`;
+                        const coverInner = track.cover ? '' : `<span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.25)">${(track.name[0] || '♪').toUpperCase()}</span>`;
+                        item.innerHTML = `
+                            <span class="idx">${String(globalIdx).padStart(2, '0')}</span>
+                            <div class="art" style="${coverBg};display:flex;align-items:center;justify-content:center">${coverInner}</div>
+                            <div class="info">
+                                <div class="name">${track.name}</div>
+                                <div class="artist">${track.artist}</div>
+                                <div class="reason">
+                                    <span class="tag">🎯 推荐理由</span>
+                                    ${track.reason || '匹配场景'}
+                                </div>
+                            </div>
+                            <span class="bpm">${track.bpm || '--'} BPM</span>
+                        `;
+                        group.appendChild(item);
+                    });
+                    trackCounter += phase.tracks.length;
+
+                    const tweak = document.createElement('div');
+                    tweak.className = 'tweak';
+                    tweak.innerHTML = `
+                        <span class="label">✏️ 微调</span>
+                        <button class="btn" data-phase="${phaseIdx}" data-action="more-energy">🔥 更燃</button>
+                        <button class="btn" data-phase="${phaseIdx}" data-action="lower-energy">☁️ 降能量</button>
+                        <input class="inp" type="text" placeholder="文字描述..." data-phase="${phaseIdx}" />
+                    `;
+                    group.appendChild(tweak);
+
+                    const compare = document.createElement('div');
+                    compare.className = 'compare';
+                    compare.id = 'compare-' + phaseIdx;
+                    group.appendChild(compare);
+
+                    trackList.appendChild(group);
+                });
+
+                document.querySelectorAll('.tweak .btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const phaseIdx = parseInt(this.dataset.phase);
+                        const action = this.dataset.action;
+                        handleTweak(phaseIdx, action, null);
+                    });
+                });
+                document.querySelectorAll('.tweak .inp').forEach(inp => {
+                    inp.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            const phaseIdx = parseInt(this.dataset.phase);
+                            const text = this.value.trim();
+                            if (text) {
+                                handleTweak(phaseIdx, 'custom', text);
+                                this.value = '';
+                            }
+                        }
+                    });
+                });
+            }
+
+            function handleTweak(phaseIdx, action, customText) {
+                const allPhases = currentPhases;
+                if (!allPhases || !allPhases[phaseIdx]) return;
+                const phase = allPhases[phaseIdx];
+                const compare = document.getElementById('compare-' + phaseIdx);
+                if (!compare) return;
+
+                let oldNames = phase.tracks.slice(0, 2).map(t => t.name).join(' / ');
+                let newNames = '';
+
+                if (action === 'more-energy') {
+                    newNames = '🔥 替换为更高能量曲目';
+                    phase.tracks.forEach(t => t.bpm = Math.min(140, (t.bpm || 120) + 6));
+                    phase.name = phase.name.replace(/ 🔥$/, '') + ' 🔥';
+                } else if (action === 'lower-energy') {
+                    newNames = '☁️ 降低能量';
+                    phase.tracks.forEach(t => t.bpm = Math.max(80, (t.bpm || 120) - 6));
+                    phase.name = phase.name.replace(/ ☁️$/, '') + ' ☁️';
+                } else if (action === 'custom') {
+                    const newTrack = {
+                        name: '🎵 ' + customText.slice(0, 14) + '...',
+                        artist: 'AI 定制',
+                        bpm: Math.round(100 + Math.random() * 30),
+                        reason: '⚡ 根据你的描述调整'
+                    };
+                    phase.tracks[0] = newTrack;
+                    phase.name = phase.name.replace(/ ✨$/, '') + ' ✨';
+                    newNames = '✨ 已根据「' + customText + '」调整';
+                } else {
+                    return;
+                }
+
+                compare.className = 'compare show';
+                compare.innerHTML = `
+                    <div>
+                        <span class="old">${oldNames}</span>
+                        <span class="arrow">→</span>
+                        <span class="new">${newNames}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="confirm" onclick="confirmTweak(${phaseIdx})">✅ 确认</button>
+                        <button onclick="undoTweak(${phaseIdx})">↩️ 撤销</button>
+                    </div>
+                `;
+                resultStatus.textContent = '⏳ 待确认';
+            }
+
+            window.confirmTweak = function(phaseIdx) {
+                const allPhases = currentPhases;
+                if (!allPhases || !allPhases[phaseIdx]) return;
+                const compare = document.getElementById('compare-' + phaseIdx);
+                if (compare) { compare.className = 'compare';
+                    compare.innerHTML = ''; }
+                renderPlaylist(allPhases, currentPlaylistTitle);
+                resultStatus.textContent = '已微调';
+                updateMetrics(currentMetrics);
+            };
+
+            window.undoTweak = function(phaseIdx) {
+                const compare = document.getElementById('compare-' + phaseIdx);
+                if (compare) { compare.className = 'compare';
+                    compare.innerHTML = ''; }
+                renderPlaylist(currentPhases, currentPlaylistTitle);
+                resultStatus.textContent = '已撤销';
+            };
+
+            function updateMetrics(metrics) {
+                if (metrics) {
+                    vmCollectRate.textContent = metrics.collectRate || 70;
+                    vmPlaylistRate.textContent = metrics.playlistRate || 80;
+                }
+            }
+
+            function showResult(data) {
+                loadingDots.classList.add('hidden');
+                renderNotes(data.notes);
+                currentPhases = data.phases;
+                currentPlaylistTitle = data.playlistTitle || '智能编排';
+                currentMetrics = data.metrics || { collectRate: 70, playlistRate: 85 };
+                renderPlaylist(data.phases, currentPlaylistTitle);
+                updateMetrics(currentMetrics);
+                resultStatus.textContent = '完成';
+                pageEntry.classList.remove('active');
+                pageResult.classList.add('active');
+                document.querySelector('.phone').scrollTop = 0;
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+
+            function simulateLoadingAndShow(data) {
+                loadingDots.classList.remove('hidden');
+                notesContainer.innerHTML = '';
+                notesContainer.appendChild(loadingDots);
+                resultStatus.textContent = '编排中...';
+                pageEntry.classList.remove('active');
+                pageResult.classList.add('active');
+                setTimeout(() => { showResult(data); }, 700);
+            }
+
+            function processTask(inputText) {
+                let matched = null;
+                for (const [key, val] of Object.entries(exampleData)) {
+                    if (inputText.includes(key) || val.input === inputText) {
+                        matched = val;
+                        break;
+                    }
+                }
+                if (matched) {
+                    const data = {
+                        notes: matched.notes,
+                        phases: matched.phases,
+                        playlistTitle: matched.notes[matched.notes.length - 1].replace(/^🎵 生成歌单：/, '').replace(
+                            /<[^>]*>/g, '').trim() || '智能编排',
+                        metrics: matched.metrics || { collectRate: 70, playlistRate: 85 }
+                    };
+                    simulateLoadingAndShow(data);
+                } else {
+                    const customNotes = [
+                        '已解析你的任务：「' + inputText + '」',
+                        '正在检索你的收藏与历史偏好...',
+                        '已完成意图理解：筛选条件已应用',
+                        '📊 置信度：整体编排 <span class="conf-tag high">78%</span>',
+                        '🎵 生成歌单：<span class="hl">「' + (inputText.slice(0, 16) || '自定义') + ' · 智能编排」</span>'
+                    ];
+                    const allTracks = defaultData.phases[0].tracks;
+                    const shuffled = allTracks.sort(() => Math.random() - 0.5);
+                    const selected = shuffled.slice(0, 5 + Math.floor(Math.random() * 4));
+                    const phases = [{
+                        name: '精选编排',
+                        bpm: '120 BPM',
+                        desc: '根据你的任务智能生成',
+                        tracks: selected.map(t => ({ ...t }))
+                    }];
+                    const data = {
+                        notes: customNotes,
+                        phases: phases,
+                        playlistTitle: '自定义任务 · 智能编排',
+                        metrics: { collectRate: 55 + Math.floor(Math.random() * 20), playlistRate: 70 + Math.floor(Math
+                                .random() * 15) }
+                    };
+                    simulateLoadingAndShow(data);
+                }
+            }
+
+            // ===== 事件 =====
+            sendBtn.addEventListener('click', function() {
+                const text = taskInput.value.trim();
+                if (!text) return;
+                processTask(text);
+                taskInput.value = '';
+            });
+
+            taskInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const text = taskInput.value.trim();
+                    if (!text) return;
+                    processTask(text);
+                    taskInput.value = '';
+                }
+            });
+
+            document.querySelectorAll('.examples .ex, .prompts .chip').forEach(el => {
+                el.addEventListener('click', function() {
+                    const task = this.dataset.task;
+                    if (task && exampleData[task]) {
+                        const inputText = exampleData[task].input;
+                        taskInput.value = inputText;
+                        processTask(inputText);
+                        taskInput.value = '';
+                    } else if (task === '自定义') {
+                        taskInput.focus();
+                    }
+                });
+            });
+
+            backBtn.addEventListener('click', function() {
+                pageResult.classList.remove('active');
+                pageEntry.classList.add('active');
+                vmSaveCount.textContent = '1';
+            });
+
+            saveBtn.addEventListener('click', function() {
+                const orig = saveBtn.textContent;
+                saveBtn.textContent = '✓ 已收藏';
+                saveBtn.style.color = 'var(--brand-green)';
+                saveBtn.style.borderColor = 'var(--brand-green)';
+                const current = parseInt(vmSaveCount.textContent) || 1;
+                vmSaveCount.textContent = current + 1;
+                setTimeout(() => {
+                    saveBtn.textContent = orig;
+                    saveBtn.style.color = '';
+                    saveBtn.style.borderColor = '';
+                }, 2000);
+            });
+
+            feedbackGood.addEventListener('click', function() {
+                const orig = feedbackGood.textContent;
+                feedbackGood.textContent = '✨ 感谢';
+                feedbackGood.style.background = 'var(--brand-green)';
+                feedbackGood.style.color = '#fff';
+                setTimeout(() => {
+                    feedbackGood.textContent = orig;
+                    feedbackGood.style.background = '';
+                    feedbackGood.style.color = '';
+                }, 2000);
+            });
+
+            feedbackBad.addEventListener('click', function() {
+                const orig = feedbackBad.textContent;
+                feedbackBad.textContent = '🔄 已记录';
+                feedbackBad.style.borderColor = '#E8836B';
+                feedbackBad.style.color = '#E8836B';
+                setTimeout(() => {
+                    feedbackBad.textContent = orig;
+                    feedbackBad.style.borderColor = '';
+                    feedbackBad.style.color = '';
+                }, 2000);
+            });
+
+            sharePoster.addEventListener('click', function() {
+                alert('🖼️ 已生成分享海报');
+            });
+            shareLink.addEventListener('click', function() {
+                alert('🔗 歌单链接已复制');
+            });
+            shareMoment.addEventListener('click', function() {
+                alert('📱 已生成朋友圈卡片');
+            });
+
+            console.log('🎵 帮我排歌 · 产品感设计版已加载');
+            if (window.location.search.includes('demo=1')) {
+                setTimeout(() => { processTask(exampleData['夜跑'].input); }, 400);
+            }
+        })();
+    </script>
+
+</body>
+</html>
